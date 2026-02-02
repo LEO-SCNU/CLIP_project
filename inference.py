@@ -19,16 +19,13 @@ def run_evaluation():
     processor = CLIPProcessor.from_pretrained(model_id)
     model.eval()
 
-    # 2. 数据准备
     dataset = CIFAR10(root='./data', train=False, download=True)
     target_map = {3: 0, 5: 1, 2: 2}  # cat:0, dog:1, bird:2
     classes_of_interest = [3, 5, 2]
     filtered_data = [(img, target_map[label]) for img, label in dataset if label in classes_of_interest]
 
-    # 3. 固定 Prompt
     text_prompts = ['a photo of a cat', 'a photo of a dog', 'a photo of a bird']
 
-    # 4. 提取文本特征
     print("提取文本特征...")
     with torch.no_grad():
         inputs_text = processor(text=text_prompts, return_tensors="pt", padding=True).to(device)
@@ -42,7 +39,7 @@ def run_evaluation():
 
         text_features /= text_features.norm(p=2, dim=-1, keepdim=True)
 
-    # 5. 推理循环
+    # 推理循环
     all_preds = []
     all_labels = []
 
@@ -77,7 +74,7 @@ def run_evaluation():
             all_preds.append(pred)
             all_labels.append(label)
 
-    # 6. 结果统计
+    # 结果统计
     all_preds = np.array(all_preds)
     all_labels = np.array(all_labels)
     class_names = ['cat', 'dog', 'bird']
@@ -97,4 +94,5 @@ def run_evaluation():
 
 
 if __name__ == "__main__":
+
     run_evaluation()
